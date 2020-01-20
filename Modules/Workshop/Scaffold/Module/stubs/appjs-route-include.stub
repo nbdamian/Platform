@@ -1,0 +1,2 @@
+import $MODULE_NAME$Routes from '../../../Modules/$MODULE_NAME$/Assets/js/vue-routes';
+// import Routes

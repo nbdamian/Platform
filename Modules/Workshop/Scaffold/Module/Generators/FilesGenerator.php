@@ -15,10 +15,18 @@ class FilesGenerator extends Generator
     public function generate(array $files)
     {
         foreach ($files as $stub => $file) {
-            $this->writeFile(
-                $this->getModulesPath($file),
-                $this->getContentFor($stub)
-            );
+	        if (strpos($file, '.js') === false):
+		        $this->writeFile(
+			        $this->getModulesPath($file),
+			        $this->getContentFor($stub)
+		        );
+	        else:
+		        $this->writeFile(
+			        $this->getModulesPath($file),
+			        $this->getContentFor($stub),
+			        ''
+		        );
+	        endif;
         }
     }
 

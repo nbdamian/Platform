@@ -19,13 +19,16 @@ class EntityGenerator extends Generator
         $this->artisan = app('Illuminate\Contracts\Console\Kernel');
     }
 
-    protected $views = [
-        'index-view.stub' => 'Resources/views/admin/$ENTITY_NAME$/index.blade',
-        'create-view.stub' => 'Resources/views/admin/$ENTITY_NAME$/create.blade',
-        'edit-view.stub' => 'Resources/views/admin/$ENTITY_NAME$/edit.blade',
-        'create-fields.stub' => 'Resources/views/admin/$ENTITY_NAME$/partials/create-fields.blade',
-        'edit-fields.stub' => 'Resources/views/admin/$ENTITY_NAME$/partials/edit-fields.blade',
-    ];
+	protected $views = [
+		'index-view.stub' => 'Resources/views/admin/$ENTITY_NAME$/index.blade',
+		'create-view.stub' => 'Resources/views/admin/$ENTITY_NAME$/create.blade',
+		'edit-view.stub' => 'Resources/views/admin/$ENTITY_NAME$/edit.blade',
+	];
+
+	protected $vue = [
+		'vue-form.stub' => 'Assets/js/components/$ENTITY_NAME$Form.vue',
+		'vue-table.stub' => 'Assets/js/components/$ENTITY_NAME$Table.vue',
+	];
 
     /**
      * Generate the given entities
@@ -59,9 +62,11 @@ class EntityGenerator extends Generator
             $this->generateRequestsFor($entity);
 	        $this->generateTransformersFor($entity);
             $this->generateViewsFor($entity);
+	        $this->generateVueFor($entity);
             $this->generateLanguageFilesFor($entity);
             $this->appendBindingsToServiceProviderFor($entity);
             $this->appendResourceRoutesToRoutesFileFor($entity);
+	        $this->appendRoutesToVueRoutesFileFor($entity);
             $this->appendPermissionsFor($entity);
             $this->appendSidebarLinksFor($entity);
             $this->appendBackendTranslations($entity);
@@ -181,6 +186,25 @@ class EntityGenerator extends Generator
         }
     }
 
+	/**
+	 * Generate vue for the given entity
+	 *
+	 * @param string $entity
+	 */
+	private function generateVueFor($entity)
+	{
+		$lowerCaseEntity = strtolower($entity);
+
+		foreach ($this->vue as $stub => $vue) {
+			$vue = str_replace('$ENTITY_NAME$', $lowerCaseEntity, $vue);
+			$this->writeFile(
+				$this->getModulesPath($vue),
+				$this->getContentForStub($stub, $entity),
+				''
+			);
+		}
+	}
+    
     /**
      * Generate language files for the given entity
      * @param string $entity
@@ -255,6 +279,26 @@ class EntityGenerator extends Generator
 	    $this->finder->put($this->getModulesPath('Http/apiRoutes.php'), $routeContent);
         
     }
+
+	/**
+	 * Append the routes for the given entity to the routes file
+	 *
+	 * @param  string                                       $entity
+	 * @throws FileNotFoundException
+	 */
+	private function appendRoutesToVueRoutesFileFor($entity)
+	{
+		$routeContent = $this->finder->get($this->getModulesPath('Assets/js/vue-routes.js'));
+		$content = $this->getContentForStub('vue-routes-const.stub', $entity);
+		$routeContent = str_replace('//append const', $content, $routeContent);
+		$this->finder->put($this->getModulesPath('Assets/js/vue-routes.js'), $routeContent);
+
+
+		$routeContent = $this->finder->get($this->getModulesPath('Assets/js/vue-routes.js'));
+		$content = $this->getContentForStub('vue-routes-export.stub', $entity);
+		$routeContent = str_replace('//append routes', $content, $routeContent);
+		$this->finder->put($this->getModulesPath('Assets/js/vue-routes.js'), $routeContent);
+	}
 
     /**
      * @param  string                                       $entity

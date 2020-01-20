@@ -1,0 +1,25 @@
+// $CLASS_NAME$ Routes
+{
+path: '/$LOWERCASE_MODULE_NAME$/$PLURAL_LOWERCASE_CLASS_NAME$',
+name: 'admin.$LOWERCASE_MODULE_NAME$.$LOWERCASE_CLASS_NAME$.index',
+component: $CLASS_NAME$Table,
+},
+{
+path: '/$LOWERCASE_MODULE_NAME$/$PLURAL_LOWERCASE_CLASS_NAME$/create',
+name: 'admin.$LOWERCASE_MODULE_NAME$.$LOWERCASE_CLASS_NAME$.create',
+component: $CLASS_NAME$Form,
+props: {
+locales,
+pageTitle: 'new-$LOWERCASE_CLASS_NAME$',
+},
+},
+{
+path: '/$LOWERCASE_MODULE_NAME$/$PLURAL_LOWERCASE_CLASS_NAME$/:$LOWERCASE_CLASS_NAME$Id/edit',
+name: 'admin.$LOWERCASE_MODULE_NAME$.$LOWERCASE_CLASS_NAME$.edit',
+component: $CLASS_NAME$Form,
+props: {
+locales,
+pageTitle: 'title.edit',
+},
+},
+//append routes

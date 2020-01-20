@@ -1,0 +1,11 @@
+//append const
+
+
+const locales = window.AsgardCMS.locales;
+
+export default [
+
+
+//append routes
+
+];

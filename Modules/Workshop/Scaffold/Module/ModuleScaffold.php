@@ -36,9 +36,11 @@ class ModuleScaffold
      * @var array of files to generate
      */
     protected $files = [
-        'permissions.stub' => 'Config/permissions',
+	    'permissions.stub' => 'Config/permissions',
 	    'backend-routes.stub' => 'Http/backendRoutes',
+	    'api-routes.stub' => 'Http/apiRoutes',
 	    'route-provider.stub' => 'Providers/RouteServiceProvider',
+	    'vue-routes.stub' => 'Assets/js/vue-routes.js',
     ];
     /**
      * @var string The type of entities to generate [Eloquent or Doctrine]
@@ -98,6 +100,7 @@ class ModuleScaffold
         $this->addDataToComposerFile();
         $this->removeUnneededFiles();
         $this->addFolders();
+	    $this->appendRoutesToAppFile();
 
         $this->filesGenerator->forModule($this->name)
             ->generateModuleProvider()
@@ -214,6 +217,7 @@ class ModuleScaffold
         $this->renameVendorName();
         $this->removeViewResources();
 
+	    $this->finder->delete($this->getModulesPath('Http/routes.php'));
         $this->finder->delete($this->getModulesPath("Http/Controllers/{$this->name}Controller.php"));
     }
 
@@ -273,8 +277,15 @@ JSON;
      */
     private function addFolders()
     {
-        $this->finder->makeDirectory($this->getModulesPath('Sidebar'));
-        $this->finder->makeDirectory($this->getModulesPath('Repositories/Cache'));
+	    $this->finder->makeDirectory($this->getModulesPath('Sidebar'));
+	    $this->finder->makeDirectory($this->getModulesPath('Repositories'));
+	    $this->finder->makeDirectory($this->getModulesPath('Repositories/Cache'));
+	    $this->finder->makeDirectory($this->getModulesPath('Events'));
+	    $this->finder->makeDirectory($this->getModulesPath('Events/Handlers'));
+
+	    $this->finder->makeDirectory($this->getModulesPath('Assets'));
+	    $this->finder->makeDirectory($this->getModulesPath('Assets/js'));
+	    $this->finder->makeDirectory($this->getModulesPath('Assets/js/components'));
     }
 
     /**
@@ -335,4 +346,74 @@ JSON;
         $moduleGitIgnore .= '!' . $this->getName() . PHP_EOL;
         $this->finder->put($modulePath . '/.gitignore', $moduleGitIgnore);
     }
+
+
+	private function appendRoutesToAppFile()
+	{
+		$routeContent = $this->finder->get(resource_path().'/assets/js/app.js');
+		$content = $this->getContentForStub('appjs-route-include.stub', '');
+		$routeContent = str_replace('// import Routes', $content, $routeContent);
+		$this->finder->put(resource_path().'/assets/js/app.js', $routeContent);
+
+		$routeContent = $this->finder->get(resource_path().'/assets/js/app.js');
+		$content = $this->getContentForStub('append-vue-router.stub', '');
+		$routeContent = str_replace('// append vue router', $content, $routeContent);
+		$this->finder->put(resource_path().'/assets/js/app.js', $routeContent);
+	}
+
+
+	/**
+	 * @param  string                                       $stub
+	 * @param  string                                       $class
+	 * @return string
+	 * @throws FileNotFoundException
+	 */
+	protected function getContentForStub($stub, $class)
+	{
+		$stub = $this->finder->get($this->getStubPath($stub));
+
+		return str_replace(
+			[
+				'$MODULE_NAME$',
+				'$LOWERCASE_MODULE_NAME$',
+				'$PLURAL_LOWERCASE_MODULE_NAME$',
+				'$CLASS_NAME$',
+				'$LOWERCASE_CLASS_NAME$',
+				'$PLURAL_LOWERCASE_CLASS_NAME$',
+				'$PLURAL_CLASS_NAME$',
+				'$ENTITY_TYPE$',
+			],
+			[
+				$this->name,
+				strtolower($this->name),
+				strtolower(str_plural($this->name)),
+				$class,
+				strtolower($class),
+				strtolower(str_plural($class)),
+				str_plural($class),
+				$this->entityType,
+			],
+			$stub
+		);
+	}
+
+	/**
+	 * Get the path the stubs for the given filename
+	 *
+	 * @param $filename
+	 * @return string
+	 */
+	protected function getStubPath($filename)
+	{
+		$folder = $this->config->get('asgard.workshop.config.custom-stubs-folder');
+
+		if ($folder !== null) {
+			$file = realpath($folder . '/' . $filename);
+			if ($file !== false) {
+				return $file;
+			}
+		}
+
+		return __DIR__ . "/stubs/$filename";
+	}
 }

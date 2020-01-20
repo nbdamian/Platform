@@ -96,15 +96,15 @@ abstract class Generator
         return __DIR__ . "/../stubs/$filename";
     }
 
-    /**
-     * Write the given content to the given file
-     * @param string $path
-     * @param string $content
-     */
-    protected function writeFile($path, $content)
-    {
-        $this->finder->put("$path.php", $content);
-    }
+	/**
+	 * Write the given content to the given file
+	 * @param string $path
+	 * @param string $content
+	 */
+	protected function writeFile($path, $content, $ext = '.php')
+	{
+		$this->finder->put("$path$ext", $content);
+	}
 
     /**
      * @param  string                                       $stub

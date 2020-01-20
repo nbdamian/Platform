@@ -4,7 +4,46 @@ namespace Modules\$MODULE_NAME$\Repositories\Eloquent;
 
 use Modules\$MODULE_NAME$\Repositories\$CLASS_NAME$Repository;
 use Modules\Core\Repositories\Eloquent\EloquentBaseRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 
 class Eloquent$CLASS_NAME$Repository extends EloquentBaseRepository implements $CLASS_NAME$Repository
-{
+	{
+		/**
+		 * Paginating, ordering and searching through tasks for server side index table
+		 *
+		 * @param Request $request
+		 *
+		 * @return LengthAwarePaginator
+		 */
+		public function serverPaginationFilteringFor(Request $request): LengthAwarePaginator
+	{
+		$$PLURAL_LOWERCASE_CLASS_NAME$ = $this->allWithBuilder();
+
+		if ($request->get('search') !== null) {
+			$term = $request->get('search');
+			$$PLURAL_LOWERCASE_CLASS_NAME$->whereHas('translations', function ($query) use ($term) {
+				$query->where('name', 'LIKE', "%{$term}%");
+			})
+			      ->orWhere('id', $term);
+		}
+
+		if ($request->get('order_by') !== null && $request->get('order') !== 'null') {
+			$order = $request->get('order') === 'ascending' ? 'asc' : 'desc';
+
+			if (str_contains($request->get('order_by'), '.')) {
+				$fields = explode('.', $request->get('order_by'));
+
+				$$PLURAL_LOWERCASE_CLASS_NAME$->with('translations')->join('$LOWERCASE_MODULE_NAME$__$LOWERCASE_CLASS_NAME$_translations as t', function ($join) {
+					$join->on('$LOWERCASE_MODULE_NAME$__$PLURAL_LOWERCASE_CLASS_NAME$.id', '=', 't.$LOWERCASE_CLASS_NAME$_id');
+				})
+				      ->where('t.locale', locale())
+				      ->groupBy('$LOWERCASE_MODULE_NAME$__$PLURAL_LOWERCASE_CLASS_NAME$.id')->orderBy("t.{$fields[1]}", $order);
+			} else {
+				$$PLURAL_LOWERCASE_CLASS_NAME$->orderBy($request->get('order_by'), $order);
+			}
+		}
+
+		return $$PLURAL_LOWERCASE_CLASS_NAME$->paginate($request->get('per_page', 10));
+	}
 }

@@ -1,0 +1,32 @@
+<?php
+
+	namespace Modules\$MODULE_NAME$\Transformers;
+
+	use Illuminate\Http\Resources\Json\Resource;
+	use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+
+	class Full$CLASS_NAME$Transformer extends Resource
+	{
+		public function toArray($request)
+		{
+			$$LOWERCASE_CLASS_NAME$Data = [
+				'id' => $this->id,
+
+				'urls' => [
+				],
+			];
+
+			foreach (LaravelLocalization::getSupportedLocales() as $locale => $supportedLocale) {
+				$$LOWERCASE_CLASS_NAME$Data[$locale] = [];
+				foreach ($this->translatedAttributes as $translatedAttribute) {
+					$$LOWERCASE_CLASS_NAME$Data[$locale][$translatedAttribute] = $this->translateOrNew($locale)->$translatedAttribute;
+				}
+			}
+
+			foreach ($this->tags as $tag) {
+				$$LOWERCASE_CLASS_NAME$Data['tags'][] = $tag->name;
+			}
+
+			return $$LOWERCASE_CLASS_NAME$Data;
+		}
+	}

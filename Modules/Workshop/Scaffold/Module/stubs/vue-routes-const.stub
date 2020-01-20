@@ -1,0 +1,3 @@
+const $CLASS_NAME$Table = () => import(/* webpackChunkName: "$LOWERCASE_MODULE_NAME$-$LOWERCASE_CLASS_NAME$-table" */ './components/$LOWERCASE_CLASS_NAME$Table.vue' );
+const $CLASS_NAME$Form = () => import(/* webpackChunkName: "$LOWERCASE_MODULE_NAME$-$LOWERCASE_CLASS_NAME$-form" */  './components/$LOWERCASE_CLASS_NAME$Form.vue');
+//append const
