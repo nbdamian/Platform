@@ -37,8 +37,8 @@ class ModuleScaffold
      */
     protected $files = [
         'permissions.stub' => 'Config/permissions',
-        'routes.stub' => 'Http/backendRoutes',
-        'route-provider.stub' => 'Providers/RouteServiceProvider',
+	    'backend-routes.stub' => 'Http/backendRoutes',
+	    'route-provider.stub' => 'Providers/RouteServiceProvider',
     ];
     /**
      * @var string The type of entities to generate [Eloquent or Doctrine]

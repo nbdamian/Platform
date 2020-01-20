@@ -57,6 +57,7 @@ class EntityGenerator extends Generator
             $this->generateRepositoriesFor($entity);
             $this->generateControllerFor($entity);
             $this->generateRequestsFor($entity);
+	        $this->generateTransformersFor($entity);
             $this->generateViewsFor($entity);
             $this->generateLanguageFilesFor($entity);
             $this->appendBindingsToServiceProviderFor($entity);
@@ -108,6 +109,15 @@ class EntityGenerator extends Generator
             $this->getModulesPath("Http/Controllers/Admin/{$entity}Controller"),
             $this->getContentForStub('admin-controller.stub', $entity)
         );
+
+	    $path = $this->getModulesPath('Http/Controllers/Api');
+	    if (! $this->finder->isDirectory($path)) {
+		    $this->finder->makeDirectory($path);
+	    }
+	    $this->writeFile(
+		    $this->getModulesPath("Http/Controllers/Api/{$entity}Controller"),
+		    $this->getContentForStub('api-controller.stub', $entity)
+	    );
     }
 
     /**
@@ -131,6 +141,27 @@ class EntityGenerator extends Generator
         );
     }
 
+	/**
+	 * Generate the transformers for the given entity
+	 *
+	 * @param string $entity
+	 */
+	private function generateTransformersFor($entity)
+	{
+		$path = $this->getModulesPath('Transformers');
+		if (! $this->finder->isDirectory($path)) {
+			$this->finder->makeDirectory($path);
+		}
+		$this->writeFile(
+			$this->getModulesPath("Transformers/Full{$entity}Transformer"),
+			$this->getContentForStub('create-full-transformer.stub', $entity)
+		);
+		$this->writeFile(
+			$this->getModulesPath("Transformers/{$entity}Transformer"),
+			$this->getContentForStub('create-transformer.stub', $entity)
+		);
+	}
+    
     /**
      * Generate views for the given entity
      *
@@ -217,6 +248,12 @@ class EntityGenerator extends Generator
         $content = $this->getContentForStub('route-resource.stub', $entity);
         $routeContent = str_replace('// append', $content, $routeContent);
         $this->finder->put($this->getModulesPath('Http/backendRoutes.php'), $routeContent);
+
+	    $routeContent = $this->finder->get($this->getModulesPath('Http/apiRoutes.php'));
+	    $content = $this->getContentForStub('api-route-resource.stub', $entity);
+	    $routeContent = str_replace('// append', $content, $routeContent);
+	    $this->finder->put($this->getModulesPath('Http/apiRoutes.php'), $routeContent);
+        
     }
 
     /**

@@ -1,0 +1,69 @@
+<?php
+
+	namespace Modules\$MODULE_NAME$\Http\Controllers\Api;
+
+	use Illuminate\Http\Request;
+	use Illuminate\Routing\Controller;
+	use Modules\$MODULE_NAME$\Entities\Page;
+	use Modules\$MODULE_NAME$\Http\Requests\Create$CLASS_NAME$Request;
+	use Modules\$MODULE_NAME$\Http\Requests\Update$CLASS_NAME$Request;
+	use Modules\$MODULE_NAME$\Repositories\$CLASS_NAME$Repository;
+	use Modules\$MODULE_NAME$\Transformers\Full$CLASS_NAME$Transformer;
+	use Modules\$MODULE_NAME$\Transformers\$CLASS_NAME$Transformer;
+
+	class $CLASS_NAME$Controller extends Controller
+	{
+		/**
+		 * @var $CLASS_NAME$Repository
+		 */
+		private $$LOWERCASE_CLASS_NAME$;
+
+		public function __construct($CLASS_NAME$Repository $$LOWERCASE_CLASS_NAME$)
+		{
+			$this->$LOWERCASE_CLASS_NAME$ = $$LOWERCASE_CLASS_NAME$;
+		}
+
+		public function index(Request $request)
+		{
+			return $CLASS_NAME$Transformer::collection($this->$LOWERCASE_CLASS_NAME$->serverPaginationFilteringFor($request));
+		}
+
+		public function store(Create$CLASS_NAME$Request $request)
+		{
+			$this->$LOWERCASE_CLASS_NAME$->create($request->all());
+
+			return response()->json([
+				'errors' => false,
+				'message' => trans('$LOWERCASE_MODULE_NAME$::messages.$LOWERCASE_CLASS_NAME$ created'),
+			]);
+		}
+
+		public function find($CLASS_NAME$ $$LOWERCASE_CLASS_NAME$)
+		{
+			return new Full$CLASS_NAME$Transformer($$LOWERCASE_CLASS_NAME$);
+		}
+		public function findNew()
+		{
+			return (new Full$CLASS_NAME$Transformer(new $CLASS_NAME$()))->additional(['data' => ['is_new' => true]]);
+		}
+
+		public function update($CLASS_NAME$ $$LOWERCASE_CLASS_NAME$, Update$CLASS_NAME$Request $request)
+		{
+			$this->$LOWERCASE_CLASS_NAME$->update($$LOWERCASE_CLASS_NAME$, $request->all());
+
+			return response()->json([
+				'errors' => false,
+				'message' => trans('$LOWERCASE_MODULE_NAME$::messages.$LOWERCASE_CLASS_NAME$ updated'),
+			]);
+		}
+
+		public function destroy($CLASS_NAME$ $$LOWERCASE_CLASS_NAME$)
+		{
+			$this->$LOWERCASE_CLASS_NAME$->destroy($$LOWERCASE_CLASS_NAME$);
+
+			return response()->json([
+				'errors' => false,
+				'message' => trans('$LOWERCASE_MODULE_NAME$::messages.$LOWERCASE_CLASS_NAME$ deleted'),
+			]);
+		}
+	}
